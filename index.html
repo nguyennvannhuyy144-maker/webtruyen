@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Web Truyện VIP</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+
+<style>
+*{box-sizing:border-box}
+
+/* đổi màu nền */
+body{
+  margin:0;
+  font-family:Arial;
+  background:#a28484;
+  color:#151212;
+}
+
+
+/* HEADER */
+/* đổi màu nút */
+header{
+  position:sticky;
+  top:0;
+  z-index:99;
+  background:#000000;
+  color:#ce280b;
+  padding:20px;
+  display:flex;
+  gap:15px;
+  flex-wrap:wrap;
+  align-items:center;
+  border-bottom:10px solid #858547;
+
+  font-size:21px; /* 👈 tăng cỡ chữ */
+}
+
+/* đổi màu nút */
+button{
+  padding:8px 12px;
+  border:1px solid #cd2c2c;
+  border-radius:6px;
+  background:#100f0f;
+  color:#a87777;
+  cursor:pointer;
+  font-weight:500;
+}
+
+button:hover{
+  background:#c10000;
+}
+
+
+/* VIP PANEL */
+#vipPanel{
+  background:#111;color:gold;
+  padding:10px;margin:10px;
+  border-radius:8px;
+  font-weight:bold;text-align:center
+}
+
+/* STORIES */
+/* ===== DANH SÁCH TRUYỆN DẠNG HÀNG NGANG ===== */
+#stories{
+  max-width:900px;
+  margin:20px auto;
+  padding:10px;
+  display:flex;
+  flex-direction:column;
+  gap:15px;
+}
+
+.story{
+  display:flex;
+  gap:15px;
+  background:#111;
+  padding:15px;
+  border-radius:12px;
+  cursor:pointer;
+  transition:0.2s;
+  align-items:center;
+  box-shadow:0 0 15px rgba(255,0,0,0.2);
+}
+
+.story:hover{
+  background:#1b0000;
+  transform:translateY(-3px);
+}
+
+.story img{
+  width:110px;
+  height:150px;
+  object-fit:cover;
+  border-radius:8px;
+  flex-shrink:0;
+}
+
+.story-info{
+  flex:1;
+}
+
+.story-info h3{
+  margin:0;
+  color:#ff2a2a;
+  font-size:18px;
+}
+
+.story-info p{
+  margin-top:8px;
+  color:#ccc;
+  font-size:14px;
+}
+
+/* ===== MOBILE ===== */
+@media(max-width:600px){
+  .story{
+    flex-direction:row;
+  }
+
+  .story img{
+    width:90px;
+    height:120px;
+  }
+
+  .story-info h3{
+    font-size:16px;
+  }
+
+  .story-info p{
+    font-size:13px;
+  }
+}
+
+
+/* DETAIL */
+#detail{padding:10px}
+.chapter{
+  padding:12px;border-bottom:1px solid #ddd;
+  cursor:pointer
+}
+.chapter.vip-lock{color:#999}
+.vip{color:gold;font-weight:bold}
+
+/* VIDEO */
+video,iframe{
+  width:100%;aspect-ratio:16/9;
+  margin-top:10px;
+  border-radius:10px;
+  background:#000
+}
+
+/* MODAL */
+.modal{
+  display:none;
+  position:fixed;
+  inset:0;
+  background: radial-gradient(circle at center, #1a0000, #000000);
+  justify-content:center;
+  align-items:center;
+  z-index:1000;
+  overflow:hidden;
+}
+
+.box{
+  width:420px;
+  padding:40px;
+  background:rgba(0,0,0,0.9);
+  border-radius:20px;
+  box-shadow:0 0 40px red;
+  text-align:center;
+  position:relative;
+  z-index:2;
+  color:white;
+}
+
+.box h3{
+  color:#ff0000;
+  margin-bottom:20px;
+}
+
+.box input{
+  width:100%;
+  padding:12px;
+  margin:10px 0;
+  border:none;
+  border-radius:8px;
+  background:#111;
+  color:white;
+  border:1px solid #330000;
+}
+
+.box input:focus{
+  border:1px solid red;
+  box-shadow:0 0 10px red;
+}
+
+.box button{
+  width:100%;
+  padding:12px;
+  margin-top:10px;
+  border:none;
+  border-radius:8px;
+  background:linear-gradient(45deg,#ff0000,#990000);
+  color:white;
+  font-weight:bold;
+}
+
+.box input{
+  width:100%;
+  padding:10px;margin-bottom:10px
+}
+
+/* đổi màu giới thiêuj */
+#introBar{
+  width:100%;
+  background:#000000;
+  color:#e3aa0f;
+  font-size:18px;
+  font-weight:900;
+  padding:20px 25px;
+  text-align:center;
+  border-top:7px solid #d81515;
+  border-bottom: 7px solid #7713f1;
+}
+
+/* ===============================
+   LAYOUT XEM TRUYỆN CHUẨN MOBILE + PC
+================================= */
+
+.reader-container{
+  display:flex;
+  flex-direction:column;
+  gap:15px;
+  padding:10px;
+  max-width:1200px;
+  margin:auto;
+}
+
+/* VIDEO HIỆN TRƯỚC TRÊN MOBILE */
+.video-box{
+  width:100%;
+  background:#000;
+  padding:12px;
+  border-radius:12px;
+  box-shadow:0 0 20px rgba(255,0,0,0.4);
+}
+
+/* MENU CHƯƠNG */
+.chapter-menu{
+  width:100%;
+  background:#111;
+  border-radius:12px;
+  padding:12px;
+  box-shadow:0 0 15px rgba(255,0,0,0.3);
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+}
+
+/* TIÊU ĐỀ */
+.chapter-menu h3{
+  width:100%;
+  color:#ff2a2a;
+  margin-bottom:10px;
+  font-size:16px;
+  text-align:center;
+}
+
+/* CHƯƠNG */
+.chapter-item{
+  padding:8px 12px;
+  border-radius:6px;
+  cursor:pointer;
+  background:#1a1a1a;
+  color:white;
+  font-size:14px;
+  white-space:nowrap;
+  transition:0.2s;
+}
+
+.chapter-item:hover{
+  background:#300000;
+}
+
+.chapter-item.active{
+  background:#cc0000;
+  font-weight:bold;
+}
+
+.chapter-item.vip-lock{
+  background:#222;
+  color:#555;
+  cursor:not-allowed;
+}
+
+/* ===== DESKTOP ===== */
+@media(min-width:992px){
+
+  .reader-container{
+    flex-direction:row;
+    align-items:flex-start;
+  }
+
+  .chapter-menu{
+    width:260px;
+    display:block;
+    max-height:80vh;
+    overflow-y:auto;
+  }
+
+  .chapter-item{
+    display:block;
+    margin-bottom:8px;
+    white-space:normal;
+  }
+
+  .video-box{
+    flex:1;
+  }
+}
+
+
+</style>
+</head>
+
+<body>
+<canvas id="snowCanvas"></canvas>
+
+<header>
+  <button onclick="goHome()">Trang chủ</button>
+  <input id="searchBox" placeholder="🔍 Tìm truyện..." oninput="searchStory()">
+  <button id="btnLogin" onclick="showLogin()">Đăng nhập</button>
+  <button id="btnRegister" onclick="showRegister()">Đăng ký</button>
+  <button id="btnVip" onclick="showVip()" style="display:none">Nạp VIP</button>
+  <span id="userBox"></span>
+</header>
+
+<div id="vipPanel" style="display:none"></div>
+
+<!-- THANH GIỚI THIỆU -->
+<div id="introBar">
+  <div class="intro-title">
+    🌸📖 WEB TRUYỆN AUDIO VIP 📖🌸
+  </div>
+
+  <div class="intro-line">
+    ✨ Hãy mở khóa chương VIP • Nghe trọn bộ • Không quảng cáo ✨
+  </div>
+
+  <div class="intro-note">
+    🌺 Lưu ý: Khi nạp VIP, xin hãy ghi <b>ĐÚNG NỘI DUNG</b>  
+    để <b>ADMIN gửi mã kích hoạt</b> 🌺
+  </div>
+
+  <div class="intro-contact">
+    🌿 Nếu có vấn đề gì, vui lòng liên hệ  
+    <span class="zalo">📱 Zalo: 0123 456 789</span>
+  </div>
+
+  <div class="intro-wish">
+    🌼 Chúc mọi người có một trải nghiệm vui vẻ 🌼
+  </div>
+</div>
+
+<div id="stories"></div>
+<div id="detail"></div>
+
+
+
+<!-- LOGIN -->
+<div class="modal" id="loginModal">
+  <div class="box">
+    <h3>Đăng nhập</h3>
+    <input id="loginEmail" placeholder="Email">
+    <input id="loginPass" type="password" placeholder="Mật khẩu">
+    <button onclick="login()">Đăng nhập</button>
+    <button onclick="closeModal()">Đóng</button>
+  </div>
+</div>
+
+<!-- REGISTER -->
+<div class="modal" id="registerModal">
+  <div class="box">
+    <h3>Đăng ký</h3>
+    <input id="regEmail" placeholder="Email">
+    <input id="regPass" type="password" placeholder="Mật khẩu">
+    <button onclick="register()">Đăng ký</button>
+    <button onclick="closeModal()">Đóng</button>
+  </div>
+</div>
+
+<!-- VIP -->
+<div class="modal" id="vipModal">
+  <div class="box" style="text-align:center">
+    <h3>👑 NẠP VIP</h3>
+
+    <img src="https://img.vietqr.io/image/VCB-0123456789-compact2.png"
+         style="width:200px;border-radius:10px;margin:10px auto">
+
+    <div style="text-align:left;font-size:14px;line-height:1.6">
+      <b>🏦 Ngân hàng:</b> Vietcombank<br>
+      <b>👤 Chủ TK:</b> NGUYEN VAN HUY<br>
+      <b>💳 Số TK:</b> 0123456789<br>
+      <b>📝 Nội dung:</b> <span id="vipContent" style="color:red"></span>
+    </div>
+
+    <hr>
+    <input id="vipCode" placeholder="Nhập mã VIP">
+    <button onclick="redeemVip()">Nạp VIP</button>
+    <button onclick="closeModal()">Đóng</button>
+  </div>
+</div>
+
+<script>
+  let currentChapterIndex = null
+
+/* ===== SUPABASE ===== */
+const { createClient } = supabase
+const db = createClient(
+  "https://bxelijlwmonamlvculqe.supabase.co",
+  "sb_publishable_oCtRZaM3PlH5jLLLcst-EQ_vxMxAt4L"
+)
+
+/* ===== STATE ===== */
+let user = null
+let vipExpire = null
+let vipTimer = null
+
+/* ===== DATA ===== */
+const storiesData=[
+  {
+  id:1,
+ title:"Tu Đại Đế",
+ cover:"https://picsum.photos/300/400?1",
+ desc:"Tu tiên nghịch thiên",
+ chapters:[
+  {name:"Chương 1",vip:false,type:"mp4",video:"https://www.w3schools.com/html/mov_bbb.mp4"},
+  {name:"Chương 2",vip:true,type:"youtube",video:"https://www.youtube.com/embed/iFb-AkgI-Ts"},
+  {name:"Chương 3",vip:true,type:"youtube",video:"https://www.youtube.com/embed/_DSiCsOK0PI"},
+
+ ]},
+   {
+  id:1,
+ title:"Tu Đại Đế",
+ cover:"https://picsum.photos/300/400?1",
+ desc:"Tu tiên nghịch thiên",
+ chapters:[
+  {name:"Chương 1",vip:false,type:"mp4",video:"https://www.w3schools.com/html/mov_bbb.mp4"},
+  {name:"Chương 2",vip:true,type:"youtube",video:"https://www.youtube.com/embed/iFb-AkgI-Ts"},
+  {name:"Chương 3",vip:true,type:"youtube",video:"https://www.youtube.com/embed/_DSiCsOK0PI"}
+ ]},
+   {
+  id:1,
+ title:"Tu Đại Đế",
+ cover:"https://picsum.photos/300/400?1",
+ desc:"Tu tiên nghịch thiên",
+ chapters:[
+  {name:"Chương 1",vip:false,type:"mp4",video:"https://www.w3schools.com/html/mov_bbb.mp4"},
+  {name:"Chương 2",vip:true,type:"youtube",video:"https://www.youtube.com/embed/iFb-AkgI-Ts"},
+  {name:"Chương 3",vip:true,type:"youtube",video:"https://www.youtube.com/embed/_DSiCsOK0PI"}
+ ]},
+   {
+  id:1,
+ title:"Tu Đại Đế",
+ cover:"https://picsum.photos/300/400?1",
+ desc:"Tu tiên nghịch thiên",
+ chapters:[
+  {name:"Chương 1",vip:false,type:"mp4",video:"https://www.w3schools.com/html/mov_bbb.mp4"},
+  {name:"Chương 2",vip:true,type:"youtube",video:"https://www.youtube.com/embed/iFb-AkgI-Ts"},
+  {name:"Chương 3",vip:true,type:"youtube",video:"https://www.youtube.com/embed/_DSiCsOK0PI"}
+ ]},
+   {
+  id:1,
+ title:"Tu Đại Đế",
+ cover:"https://picsum.photos/300/400?1",
+ desc:"Tu tiên nghịch thiên",
+ chapters:[
+  {name:"Chương 1",vip:false,type:"mp4",video:"https://www.w3schools.com/html/mov_bbb.mp4"},
+  {name:"Chương 2",vip:true,type:"youtube",video:"https://www.youtube.com/embed/iFb-AkgI-Ts"},
+  {name:"Chương 3",vip:true,type:"youtube",video:"https://www.youtube.com/embed/_DSiCsOK0PI"}
+ ]},
+   {
+  id:1,
+ title:"Tu Đại Đế",
+ cover:"https://picsum.photos/300/400?1",
+ desc:"Tu tiên nghịch thiên",
+ chapters:[
+  {name:"Chương 1",vip:false,type:"mp4",video:"https://www.w3schools.com/html/mov_bbb.mp4"},
+  {name:"Chương 2",vip:true,type:"youtube",video:"https://www.youtube.com/embed/iFb-AkgI-Ts"},
+  {name:"Chương 3",vip:true,type:"youtube",video:"https://www.youtube.com/embed/_DSiCsOK0PI"}
+ ]},
+   {
+  id:1,
+ title:"Tu Đại Đế",
+ cover:"https://picsum.photos/300/400?1",
+ desc:"Tu tiên nghịch thiên",
+ chapters:[
+  {name:"Chương 1",vip:false,type:"mp4",video:"https://www.w3schools.com/html/mov_bbb.mp4"},
+  {name:"Chương 2",vip:true,type:"youtube",video:"https://www.youtube.com/embed/iFb-AkgI-Ts"},
+  {name:"Chương 3",vip:true,type:"youtube",video:"https://www.youtube.com/embed/_DSiCsOK0PI"}
+ ]},
+   {
+  id:1,
+ title:"Tu Đại Đế",
+ cover:"https://picsum.photos/300/400?1",
+ desc:"Tu tiên nghịch thiên",
+ chapters:[
+  {name:"Chương 1",vip:false,type:"mp4",video:"https://www.w3schools.com/html/mov_bbb.mp4"},
+  {name:"Chương 2",vip:true,type:"youtube",video:"https://www.youtube.com/embed/iFb-AkgI-Ts"},
+  {name:"Chương 3",vip:true,type:"youtube",video:"https://www.youtube.com/embed/_DSiCsOK0PI"}
+ ]},
+   {
+  id:1,
+ title:"Tu Đại Đế",
+ cover:"https://picsum.photos/300/400?1",
+ desc:"Tu tiên nghịch thiên",
+ chapters:[
+  {name:"Chương 1",vip:false,type:"mp4",video:"https://www.w3schools.com/html/mov_bbb.mp4"},
+  {name:"Chương 2",vip:true,type:"youtube",video:"https://www.youtube.com/embed/iFb-AkgI-Ts"},
+  {name:"Chương 3",vip:true,type:"youtube",video:"https://www.youtube.com/embed/_DSiCsOK0PI"}
+ ]},
+   {
+  id:1,
+ title:"Tu Đại Đế",
+ cover:"https://picsum.photos/300/400?1",
+ desc:"Tu tiên nghịch thiên",
+ chapters:[
+  {name:"Chương 1",vip:false,type:"mp4",video:"https://www.w3schools.com/html/mov_bbb.mp4"},
+  {name:"Chương 2",vip:true,type:"youtube",video:"https://www.youtube.com/embed/iFb-AkgI-Ts"},
+  {name:"Chương 3",vip:true,type:"youtube",video:"https://www.youtube.com/embed/_DSiCsOK0PI"}
+ ]},
+   {
+  id:1,
+ title:"Tu Đại Đế",
+ cover:"https://picsum.photos/300/400?1",
+ desc:"Tu tiên nghịch thiên",
+ chapters:[
+  {name:"Chương 1",vip:false,type:"mp4",video:"https://www.w3schools.com/html/mov_bbb.mp4"},
+  {name:"Chương 2",vip:true,type:"youtube",video:"https://www.youtube.com/embed/iFb-AkgI-Ts"},
+  {name:"Chương 3",vip:true,type:"youtube",video:"https://www.youtube.com/embed/_DSiCsOK0PI"}
+ ]},
+ 
+ 
+]
+
+/* ===== AUTH ===== */
+async function register(){
+ const {error}=await db.auth.signUp({
+  email:regEmail.value,
+  password:regPass.value
+ })
+ if(error) return alert(error.message)
+
+ await db.from("mywebtruyen_vip")
+  .insert({email:regEmail.value,vip_expire:null})
+
+ alert("Đăng ký thành công")
+ closeModal()
+}
+async function login(){
+ const {error}=await db.auth.signInWithPassword({
+  email:loginEmail.value,
+  password:loginPass.value
+ })
+ if(error) alert(error.message)
+ else location.reload()
+}
+async function logout(){
+ await db.auth.signOut()
+ location.reload()
+}
+
+/* ===== VIP REDEEM (KHÔNG CỘNG DỒN – MAX 30 NGÀY) ===== */
+async function redeemVip(){
+ if(!user) return alert("Đăng nhập trước")
+
+ if(vipExpire && vipExpire > new Date()){
+  return alert("⏳ Bạn vẫn còn VIP, chờ hết hạn")
+ }
+
+ const code = vipCode.value.trim()
+ if(!code) return alert("Nhập mã VIP")
+
+ const {data,error} = await db
+  .from("vip_codes")
+  .select("*")
+  .eq("code",code)
+  .eq("used",false)
+  .single()
+
+ if(error || !data) return alert("❌ Mã VIP không hợp lệ")
+
+ const days = Math.min(data.days,30)
+ const expire = new Date()
+ expire.setDate(expire.getDate()+days)
+
+ await db.from("mywebtruyen_vip")
+  .update({vip_expire:expire})
+  .eq("email",user.email)
+
+ await db.from("vip_codes")
+  .update({used:true})
+  .eq("id",data.id)
+
+ alert("🎉 Nạp VIP thành công "+days+" ngày")
+ location.reload()
+}
+
+/* ===== VIP COUNTDOWN ===== */
+async function loadVip(){
+ const {data} = await db
+  .from("mywebtruyen_vip")
+  .select("vip_expire")
+  .eq("email",user.email)
+  .single()
+
+ if(!data?.vip_expire) return
+
+ vipExpire = new Date(data.vip_expire)
+ if(vipExpire <= new Date()) return
+
+ vipPanel.style.display="block"
+
+ if(vipTimer) clearInterval(vipTimer)
+
+ vipTimer = setInterval(()=>{
+  const diff = vipExpire - new Date()
+
+  if(diff <= 0){
+   vipPanel.innerText="❌ VIP đã hết hạn"
+   vipExpire=null
+   clearInterval(vipTimer)
+
+   const id=new URLSearchParams(location.search).get("story")
+   if(id) renderStoryPage(id)
+   return
+  }
+
+  const d=Math.floor(diff/86400000)
+  const h=Math.floor(diff%86400000/3600000)
+  const m=Math.floor(diff%3600000/60000)
+  const s=Math.floor(diff%60000/1000)
+
+  vipPanel.innerText=
+   `👑 VIP còn: ${d} ngày ${h} giờ ${m} phút ${s} giây`
+ },1000)
+}
+
+function isVIP(){
+ return vipExpire && vipExpire > new Date()
+}
+
+/* ===== UI ===== */
+function renderStories(list){
+ stories.innerHTML=""
+ detail.innerHTML=""
+
+ list.forEach(s=>{
+  stories.innerHTML+=`
+  <div class="story" onclick="openStoryPage(${s.id})">
+    <img src="${s.cover}">
+    <div class="story-info">
+      <h3>${s.title}</h3>
+      <p>${s.desc}</p>
+    </div>
+  </div>`
+ })
+}
+
+function openStoryPage(id){
+ location.href="?story="+id
+}
+
+function renderStoryPage(id){
+  introBar.style.display = "none"
+stories.style.display = "none"
+
+ const s=storiesData.find(x=>x.id==id)
+ const vip=isVIP()
+
+ let menuHTML = `<h3>📚 ${s.title}</h3>`
+
+ s.chapters.forEach((c,i)=>{
+  if(c.vip && !vip){
+   menuHTML+=`
+   <div class="chapter-item vip-lock">
+    🔒 ${c.name}
+   </div>`
+  }else{
+   menuHTML+=`
+   <div class="chapter-item ${i===currentChapterIndex?'active':''}"
+    onclick="playChapter(${id},${i})">
+    ▶ ${c.name}
+   </div>`
+  }
+ })
+
+detail.innerHTML=`
+ <div class="reader-container">
+
+   <div class="video-box" id="videoBox">
+     ${currentChapterIndex===null?'<h3 style="color:white">Chọn chương để xem</h3>':''}
+   </div>
+
+   <div class="chapter-menu" id="chapterMenu">
+     ${menuHTML}
+   </div>
+
+
+
+     ${currentChapterIndex===null?'<h3 style="color:white">Chọn chương để xem</h3>':''}
+   </div>
+ </div>`
+}
+
+
+function playChapter(id,i){
+ currentChapterIndex = i
+
+ const s=storiesData.find(x=>x.id==id)
+ const c=s.chapters[i]
+
+ renderStoryPage(id)
+
+ const videoBox=document.getElementById("videoBox")
+
+ videoBox.innerHTML=`
+ <h3 style="color:white">${c.name}</h3>
+ ${c.type=="mp4"
+ ?`<video controls autoplay src="${c.video}"></video>`
+ :`<iframe src="${c.video}" allowfullscreen></iframe>`}`
+}
+
+
+function searchStory(){
+ const q=searchBox.value.toLowerCase()
+ renderStories(storiesData.filter(s=>s.title.toLowerCase().includes(q)))
+}
+function goHome(){
+
+ introBar.style.display = "block"
+ stories.style.display = "flex"
+ detail.innerHTML = ""
+ currentChapterIndex = null
+
+ renderStories(storiesData)   // ⚠ QUAN TRỌNG
+
+ history.pushState({}, "", "?")
+}
+
+
+function showLogin(){loginModal.style.display="flex"}
+function showRegister(){registerModal.style.display="flex"}
+function showVip(){
+ if(!user) return alert("Đăng nhập trước")
+ vipModal.style.display="flex"
+ vipContent.innerText="VIP "+user.email
+}
+function closeModal(){
+ loginModal.style.display=
+ registerModal.style.display=
+ vipModal.style.display="none"
+}
+
+/* ===== INIT ===== */
+async function init(){
+ const {data}=await db.auth.getUser()
+ user=data.user
+
+if(user){
+  btnLogin.style.display="none"
+  btnRegister.style.display="none"
+  btnVip.style.display="inline-block"   // 👈 hiện nút VIP khi đã đăng nhập
+  userBox.innerHTML=user.email+" <button onclick='logout()'>Thoát</button>"
+  await loadVip()
+}else{
+  btnVip.style.display="none"  // 👈 ẩn VIP nếu chưa đăng nhập
+}
+
+
+ const id=new URLSearchParams(location.search).get("story")
+ id?renderStoryPage(id):renderStories(storiesData)
+}
+init()
+
+
+</script>
+
+</body>
+</html>

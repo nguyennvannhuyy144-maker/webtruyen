@@ -89,12 +89,19 @@ button:hover{
 
 
 .story img{
-  width:140px;              /* cố định chiều ngang */
+  width:160px;              /* cố định chiều ngang */
   aspect-ratio:16/9;        /* chuẩn YouTube */
   object-fit:cover;
   border-radius:10px;
   flex-shrink:0;
 }
+.story img{
+  filter:brightness(0.9);
+}
+.story:hover img{
+  filter:brightness(1.1);
+}
+
 
 .story-info{
   flex:1;
@@ -115,18 +122,30 @@ button:hover{
 /* ===== MOBILE ===== */
 @media(max-width:600px){
 
+  .story{
+    flex-direction:column;   /* chuyển thành dọc */
+    align-items:flex-start;
+  }
+
   .story img{
-    width:110px;
+    width:100%;              /* full chiều ngang */
+    aspect-ratio:16/9;
+  }
+
+  .story-info{
+    width:100%;
   }
 
   .story-info h3{
-    font-size:15px;
+    font-size:16px;
+    margin-top:8px;
   }
 
   .story-info p{
     font-size:13px;
   }
 }
+
 
 
 

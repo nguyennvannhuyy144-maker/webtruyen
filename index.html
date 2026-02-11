@@ -123,21 +123,28 @@ button:hover{
 @media(max-width:600px){
 
   .story{
-    flex-direction:column;
-    align-items:stretch;
+    flex-direction:column;   /* chuyển thành dọc */
+    align-items:flex-start;
   }
 
   .story img{
-    width:100%;
-    height:auto;       /* giữ nguyên */
+    width:100%;              /* full chiều ngang */
+    aspect-ratio:16/9;
   }
 
   .story-info{
     width:100%;
-    padding-top:8px;
+  }
+
+  .story-info h3{
+    font-size:16px;
+    margin-top:8px;
+  }
+
+  .story-info p{
+    font-size:13px;
   }
 }
-
 
 
 
@@ -394,6 +401,7 @@ video,iframe{
     <h3>Đăng ký</h3>
     <input id="regEmail" placeholder="Email">
     <input id="regPass" type="password" placeholder="Mật khẩu">
+    <input id="regPhone" placeholder="Số điện thoại">
     <button onclick="register()">Đăng ký</button>
     <button onclick="closeModal()">Đóng</button>
   </div>
@@ -411,7 +419,12 @@ video,iframe{
       <b>🏦 Ngân hàng:</b> Vietcombank<br>
       <b>👤 Chủ TK:</b> NGUYEN VAN HUY<br>
       <b>💳 Số TK:</b> 0123456789<br>
-      <b>📝 Nội dung:</b> <span id="vipContent" style="color:red"></span>
+      <b>📝 Nội dung:</b>  <span id="vipContent" style="color:red"></span> <br>
+       <b> ⚠ VUI LÒNG NHẬP ĐÚNG <span class="vip-important">SỐ ĐIỆN THOẠI CỦA BẠN</span>  
+    VÀO PHẦN NỘI DUNG CHUYỂN KHOẢN  </b> <br>
+      <b>🚨Nếu bạn nhập sai nội dung thì vui lòng liên qua </b> <br>
+      <b>📞Hotline : </b><br>
+      <b>💬Để admin gửi mã nhé </b><br>
     </div>
 
     <hr>
@@ -427,9 +440,14 @@ video,iframe{
 /* ===== SUPABASE ===== */
 const { createClient } = supabase
 const db = createClient(
+  
   "https://bxelijlwmonamlvculqe.supabase.co",
   "sb_publishable_oCtRZaM3PlH5jLLLcst-EQ_vxMxAt4L"
 )
+// 👇 THÊM ĐOẠN NÀY
+db.auth.onAuthStateChange((event, session) => {
+  user = session?.user || null
+})
 
 /* ===== STATE ===== */
 let user = null
@@ -552,82 +570,173 @@ cover:"https://img.youtube.com/vi/i5RfNgYNjQM/maxresdefault.jpg",
  
  
 ]
+async function login(){
+
+ const email = loginEmail.value.trim()
+ const password = loginPass.value.trim()
+
+ if(!email || !password){
+   return alert("Vui lòng nhập email và mật khẩu")
+ }
+
+ const {error} = await db.auth.signInWithPassword({
+   email: email,
+   password: password
+ })
+
+ if(error){
+   return alert("Sai email hoặc mật khẩu")
+ }
+
+ alert("Đăng nhập thành công")
+ closeModal()
+ location.reload()
+}
 
 /* ===== AUTH ===== */
 async function register(){
- const {error}=await db.auth.signUp({
-  email:regEmail.value,
-  password:regPass.value
+
+ const email = regEmail.value.trim()
+ const password = regPass.value.trim()
+ const phone = regPhone.value.trim()
+
+ if(!email || !password || !phone){
+   return alert("Vui lòng nhập đầy đủ thông tin")
+ }
+
+ if(!/^[0-9]{9,11}$/.test(phone)){
+   return alert("Số điện thoại không hợp lệ")
+ }
+
+ const {error} = await db.auth.signUp({
+  email: email,
+  password: password
  })
+
  if(error) return alert(error.message)
 
- await db.from("mywebtruyen_vip")
-  .insert({email:regEmail.value,vip_expire:null})
+const { error: insertError } = await db
+  .from("mywebtruyen_vip")
+  .upsert({
+    email: email,
+    vip_expire: null,
+    phone: phone
+  })
+
+if(insertError){
+  console.log(insertError)
+}
+
 
  alert("Đăng ký thành công")
  closeModal()
 }
-async function login(){
- const {error}=await db.auth.signInWithPassword({
-  email:loginEmail.value,
-  password:loginPass.value
- })
- if(error) alert(error.message)
- else location.reload()
-}
-async function logout(){
- await db.auth.signOut()
- location.reload()
-}
+
 
 /* ===== VIP REDEEM (KHÔNG CỘNG DỒN – MAX 30 NGÀY) ===== */
 async function redeemVip(){
- if(!user) return alert("Đăng nhập trước")
+  if(!user){
+    alert("Đăng nhập trước")
+    
+    return
+  }
+  // ❌ Không cho nạp nếu còn VIP
+if(vipExpire && new Date(vipExpire) > new Date()){
+  alert("⚠ Bạn vẫn còn thời gian VIP. Không thể nạp thêm.")
+  return
+}
 
- if(vipExpire && vipExpire > new Date()){
-  return alert("⏳ Bạn vẫn còn VIP, chờ hết hạn")
- }
+  const code = vipCode.value.trim()
+  if(!code){
+    alert("Nhập mã VIP")
+    return
+  }
 
- const code = vipCode.value.trim()
- if(!code) return alert("Nhập mã VIP")
-
- const {data,error} = await db
+const { data, error } = await db
   .from("vip_codes")
   .select("*")
-  .eq("code",code)
-  .eq("used",false)
+  .eq("code", code)
   .single()
 
- if(error || !data) return alert("❌ Mã VIP không hợp lệ")
+if(error || !data){
+  alert("❌ Mã VIP không hợp lệ")
+  return
+}
 
- const days = Math.min(data.days,30)
- const expire = new Date()
- expire.setDate(expire.getDate()+days)
 
- await db.from("mywebtruyen_vip")
-  .update({vip_expire:expire})
-  .eq("email",user.email)
+// Luôn 30 ngày kể từ hiện tại
+const expire = new Date()
+expire.setDate(expire.getDate() + 30)
 
- await db.from("vip_codes")
-  .update({used:true})
-  .eq("id",data.id)
 
- alert("🎉 Nạp VIP thành công "+days+" ngày")
- location.reload()
+const { error: updateError } = await db
+  .from("mywebtruyen_vip")
+  .update({
+    vip_expire: expire
+  })
+  .eq("email", user.email)
+
+if(updateError){
+  console.log(updateError)
+  alert("Lỗi cập nhật VIP")
+  return
+}
+
+
+
+  console.log("UPDATE ERROR:", updateError)
+
+  await db
+    .from("vip_codes")
+    .update({ used: true })
+    .eq("id", data.id)
+
+vipExpire = expire
+alert("🎉 Nạp VIP thành công 30 ngày")
+
+closeModal()
+loadVip()
+renderStoryPage(new URLSearchParams(location.search).get("story"))
+
+
+  closeModal()
+  await loadVip()
 }
 
 /* ===== VIP COUNTDOWN ===== */
 async function loadVip(){
- const {data} = await db
+
+ const { data, error } = await db
   .from("mywebtruyen_vip")
   .select("vip_expire")
-  .eq("email",user.email)
-  .single()
+  .eq("email", user.email)
 
- if(!data?.vip_expire) return
+ console.log("LOAD VIP DATA:", data)
 
- vipExpire = new Date(data.vip_expire)
- if(vipExpire <= new Date()) return
+ if(error){
+   console.log("LOAD VIP ERROR:", error)
+   return
+ }
+
+ if(!data || data.length === 0){
+   console.log("Không có dòng VIP")
+   return
+ }
+
+ if(!data[0].vip_expire){
+   console.log("Chưa có vip_expire")
+   return
+ }
+
+ vipExpire = new Date(data[0].vip_expire)
+
+ console.log("VIP EXPIRE:", vipExpire)
+ console.log("NOW:", new Date())
+
+ if(vipExpire <= new Date()){
+   console.log("VIP đã hết hạn")
+   return
+ }
 
  vipPanel.style.display="block"
 
@@ -640,9 +749,6 @@ async function loadVip(){
    vipPanel.innerText="❌ VIP đã hết hạn"
    vipExpire=null
    clearInterval(vipTimer)
-
-   const id=new URLSearchParams(location.search).get("story")
-   if(id) renderStoryPage(id)
    return
   }
 
@@ -651,10 +757,12 @@ async function loadVip(){
   const m=Math.floor(diff%3600000/60000)
   const s=Math.floor(diff%60000/1000)
 
-  vipPanel.innerText=
+  vipPanel.innerText =
    `👑 VIP còn: ${d} ngày ${h} giờ ${m} phút ${s} giây`
+
  },1000)
 }
+
 
 function isVIP(){
  return vipExpire && vipExpire > new Date()
@@ -761,43 +869,91 @@ function goHome(){
 
 function showLogin(){loginModal.style.display="flex"}
 function showRegister(){registerModal.style.display="flex"}
-function showVip(){
- if(!user) return alert("Đăng nhập trước")
- vipModal.style.display="flex"
- vipContent.innerText="VIP "+user.email
+async function showVip(){
+
+  if(!user){
+    alert("Đăng nhập trước")
+    return
+  }
+
+  const { data, error } = await db
+    .from("mywebtruyen_vip")
+    .select("phone")
+    .eq("email", user.email)
+
+  if(error){
+    console.log(error)
+    alert("Lỗi truy vấn database")
+    return
+  }
+
+  if(!data || data.length === 0){
+    alert("Chưa có thông tin số điện thoại. Vui lòng đăng ký lại.")
+    return
+  }
+
+  vipModal.style.display="flex"
+  vipContent.innerText = data[0].phone || "Chưa có SĐT"
 }
-function closeModal(){
- loginModal.style.display=
- registerModal.style.display=
- vipModal.style.display="none"
-}
+
+
+
+
 
 /* ===== INIT ===== */
 async function init(){
- const {data}=await db.auth.getUser()
- user=data.user
 
-if(user){
-  btnLogin.style.display="none"
-  btnRegister.style.display="none"
-  btnVip.style.display="inline-block"   // 👈 hiện nút VIP khi đã đăng nhập
-  userBox.innerHTML=user.email+" <button onclick='logout()'>Thoát</button>"
-  await loadVip()
-}else{
-  btnVip.style.display="none"  // 👈 ẩn VIP nếu chưa đăng nhập
+  // Lấy session đúng cách
+  const { data: { session } } = await db.auth.getSession()
+
+  if(session && session.user){
+
+    user = session.user
+
+    // Ẩn nút đăng nhập / đăng ký
+    btnLogin.style.display="none"
+    btnRegister.style.display="none"
+
+    // Hiện nút VIP
+    btnVip.style.display="inline-block"
+
+    // Hiển thị email + nút thoát
+    userBox.innerHTML =
+      user.email + " <button onclick='logout()'>Thoát</button>"
+
+    // Load đếm ngược VIP
+    await loadVip()
+
+  }else{
+    btnVip.style.display="none"
+  }
+
+  // Render trang
+  const id=new URLSearchParams(location.search).get("story")
+  id?renderStoryPage(id):renderStories(storiesData)
 }
 
-
- const id=new URLSearchParams(location.search).get("story")
- id?renderStoryPage(id):renderStories(storiesData)
-}
 init()
+
+function closeModal(){
+  document.getElementById("loginModal").style.display = "none";
+  document.getElementById("registerModal").style.display = "none";
+  document.getElementById("vipModal").style.display = "none";
+}
+
+window.onclick = function(e){
+  if(e.target.classList.contains("modal")){
+    closeModal();
+  }
+}
+
+async function logout(){
+  await db.auth.signOut()
+  location.reload()
+}
 
 
 </script>
 
 </body>
 </html>
-
-
-

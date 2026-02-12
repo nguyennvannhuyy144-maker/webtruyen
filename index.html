@@ -11,15 +11,11 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="stories.js"></script>
-
 <style>
 
 
 
 
-
-
-  
 *{box-sizing:border-box}
 
 /* đổi màu nền */
@@ -383,7 +379,7 @@ video,iframe{
 
   <div class="intro-contact">
     🌿 Nếu có vấn đề gì, vui lòng liên hệ  
-    <span class="zalo">📱 Zalo: 0123 456 789</span>
+    <span class="zalo">📱 Zalo: 098 5380124 </span>
   </div>
 
   <div class="intro-wish">
@@ -393,6 +389,7 @@ video,iframe{
 
 <div id="stories"></div>
 <div id="detail"></div>
+
 
 
 
@@ -424,25 +421,39 @@ video,iframe{
   <div class="box" style="text-align:center">
     <h3>👑 NẠP VIP</h3>
 
-    <img src="https://img.vietqr.io/image/VCB-0123456789-compact2.png"
-         style="width:200px;border-radius:10px;margin:10px auto">
+    <img src="2.jpg"
+         style="width:180px;border-radius:15px;margin:10px auto">
 
-    <div style="text-align:left;font-size:14px;line-height:1.6">
-      <b>🏦 Ngân hàng:</b> Vietcombank<br>
-      <b>👤 Chủ TK:</b> NGUYEN VAN HUY<br>
-      <b>💳 Số TK:</b> 0123456789<br>
+    <div style="text-align:left;font-size:13px;line-height:1.6">
+      <b>🏦 Ngân hàng:</b> Techcombank<br>
+      <b>👤 Chủ TK:</b> NGUYEN VAN THANH<br>
+      <b>💳 Số TK:</b> 1903 5956 5400 10<br>
+      <b> 💰 SỐ TIỀN: </b> 50.000 VND <br>
       <b>📝 Nội dung:</b>  <span id="vipContent" style="color:red"></span> <br>
        <b> ⚠ VUI LÒNG NHẬP ĐÚNG <span class="vip-important">SỐ ĐIỆN THOẠI CỦA BẠN</span>  
     VÀO PHẦN NỘI DUNG CHUYỂN KHOẢN  </b> <br>
-      <b>🚨Nếu bạn nhập sai nội dung thì vui lòng liên qua </b> <br>
-      <b>📞Hotline : </b><br>
+<b>🚨Nếu bạn nhập sai nội dung thì vui lòng liên hệ qua 
+  <span style="color:red;">tin nhắn</span>
+</b> <br>
+
+      <b>📞Hotline : </b> <span style="color:gold ;"> 098 5380124  </span> <br>
       <b>💬Để admin gửi mã nhé </b><br>
     </div>
 
-    <hr>
-    <input id="vipCode" placeholder="Nhập mã VIP">
-    <button onclick="redeemVip()">Nạp VIP</button>
-    <button onclick="closeModal()">Đóng</button>
+<hr>
+
+<div id="vipRedeemBox">
+  <input id="vipCode" placeholder="Nhập mã VIP">
+  <button onclick="redeemVip()">Nạp VIP</button>
+</div>
+
+<div id="vipActiveBox" style="display:none; color:gold; font-weight:bold; margin:10px 0;">
+  👑 Bạn đang còn thời hạn VIP.<br>
+  Không thể nạp thêm khi VIP chưa hết hạn.
+</div>
+
+<button onclick="closeModal()">Đóng</button>
+
   </div>
 </div>
 
@@ -474,26 +485,40 @@ let vipTimer = null
 
 async function login(){
 
- const email = loginEmail.value.trim()
- const password = loginPass.value.trim()
+  const email = loginEmail.value.trim()
+  const password = loginPass.value.trim()
 
- if(!email || !password){
-   return alert("Vui lòng nhập email và mật khẩu")
- }
+  if(!email || !password){
+    alert("Vui lòng nhập email và mật khẩu")
+    return
+  }
 
- const {error} = await db.auth.signInWithPassword({
-   email: email,
-   password: password
- })
+  try{
+    const { data, error } = await db.auth.signInWithPassword({
+      email: email,
+      password: password
+    })
 
- if(error){
-   return alert("Sai email hoặc mật khẩu")
- }
+    if(error){
+      alert("❌ Sai email hoặc mật khẩu")
+      return
+    }
 
- alert("Đăng nhập thành công")
- closeModal()
- location.reload()
+    if(!data.user){
+      alert("❌ Tài khoản không tồn tại")
+      return
+    }
+
+    alert("✅ Đăng nhập thành công")
+    closeModal()
+    location.reload()
+
+  }catch(err){
+    console.log(err)
+    alert("Có lỗi xảy ra khi đăng nhập")
+  }
 }
+
 
 /* ===== AUTH ===== */
 async function register(){
@@ -635,10 +660,13 @@ async function loadVip(){
  console.log("VIP EXPIRE:", vipExpire)
  console.log("NOW:", new Date())
 
- if(vipExpire <= new Date()){
+if(vipExpire <= new Date()){
+   vipExpire = null
+   vipPanel.style.display="none"
    console.log("VIP đã hết hạn")
    return
- }
+}
+
 
  vipPanel.style.display="block"
 
@@ -677,7 +705,7 @@ function renderStories(list){
 
  list.forEach(s=>{
   stories.innerHTML+=`
-  <div class="story" onclick="openStoryPage(${s.id})">
+<div class="story" onclick="handleStoryClick(${s.id})">
     <img src="${s.cover}">
     <div class="story-info">
       <h3>${s.title}</h3>
@@ -719,7 +747,7 @@ detail.innerHTML=`
  <div class="reader-container">
 
    <div class="video-box" id="videoBox">
-     ${currentChapterIndex===null?'<h3 style="color:white">Chọn chương để xem</h3>':''}
+     ${currentChapterIndex===null?'<h3 style="color:white">💎 Vui lòng chọn chương để xem 💎</h3>':''}
    </div>
 
    <div class="chapter-menu" id="chapterMenu">
@@ -728,7 +756,7 @@ detail.innerHTML=`
 
 
 
-     ${currentChapterIndex===null?'<h3 style="color:white">Chọn chương để xem</h3>':''}
+
    </div>
  </div>`
 }
@@ -780,23 +808,37 @@ async function showVip(){
 
   const { data, error } = await db
     .from("mywebtruyen_vip")
-    .select("phone")
+    .select("phone, vip_expire")
     .eq("email", user.email)
+    .single()
 
-  if(error){
-    console.log(error)
+  if(error || !data){
     alert("Lỗi truy vấn database")
     return
   }
 
-  if(!data || data.length === 0){
-    alert("Chưa có thông tin số điện thoại. Vui lòng đăng ký lại.")
-    return
-  }
-
   vipModal.style.display="flex"
-  vipContent.innerText = data[0].phone || "Chưa có SĐT"
+  vipContent.innerText = data.phone || "Chưa có SĐT"
+
+  // Kiểm tra còn VIP hay không
+  if(data.vip_expire && new Date(data.vip_expire) > new Date()){
+
+    // Ẩn phần nhập mã
+    document.getElementById("vipRedeemBox").style.display="none"
+
+    // Hiện thông báo còn VIP
+    document.getElementById("vipActiveBox").style.display="block"
+
+  }else{
+
+    // Hiện phần nhập mã
+    document.getElementById("vipRedeemBox").style.display="block"
+
+    // Ẩn thông báo
+    document.getElementById("vipActiveBox").style.display="none"
+  }
 }
+
 
 
 
@@ -821,7 +863,7 @@ async function init(){
 
     // Hiển thị email + nút thoát
     userBox.innerHTML =
-      user.email + " <button onclick='logout()'>Thoát</button>"
+      user.email + " <button onclick='logout()'>Đăng Xuất</button>"
 
     // Load đếm ngược VIP
     await loadVip()
@@ -856,6 +898,133 @@ async function logout(){
 
 
 </script>
+
+  
+
+  
+<!-- ===== QUẢNG CÁO OVERLAY ===== -->
+<div id="adsOverlay" style="
+  display:none;
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,0.85);
+  z-index:999999;
+  justify-content:center;
+  align-items:center;
+">
+
+  <div style="
+    background:#fff;
+    padding:35px 30px;
+    border-radius:20px;
+    position:relative;
+    text-align:center;
+    width:90%;
+    max-width:420px;
+    box-shadow:0 0 40px red;
+  ">
+
+    <!-- NÚT X -->
+<div onclick="openAdsNewTab()" style="
+  position:absolute;
+  top:10px;
+  right:15px;
+  cursor:pointer;
+  font-size:28px;
+  color:red;
+">✖</div>
+
+
+    <h2 style="margin-top:10px;color:#c10000">
+      🔥 QUẢNG CÁO 🔥
+    </h2>
+
+    <p style="font-size:18px;margin:20px 0">
+      👉 Click để nhận ưu đãi đặc biệt
+    </p>
+
+<a href="https://www.google.com"
+   target="_blank"
+   onclick="adsDone()"
+   style="
+     display:block;
+     width:100%;
+     padding:15px;
+     font-size:20px;
+     background:linear-gradient(45deg,#ff0000,#b30000);
+     color:white;
+     text-align:center;
+     border-radius:12px;
+     font-weight:bold;
+     text-decoration:none;
+   ">
+   🚀 XEM NGAY
+</a>
+
+
+  </div>
+</div>
+
+
+<script>
+// Khi click truyện
+function handleStoryClick(id) {
+
+  // Nếu đã xem quảng cáo rồi → vào truyện luôn
+  if (sessionStorage.getItem("ads_done") === "1") {
+    openStoryPage(id);
+    return;
+  }
+
+  // LƯU ID TRUYỆN (RẤT QUAN TRỌNG)
+  localStorage.setItem("pending_story", id);
+
+  // Hiện quảng cáo
+  document.getElementById("adsOverlay").style.display = "flex";
+}
+
+// Khi bấm X hoặc nút quảng cáo
+function closeAds() {
+
+  // Đánh dấu đã xem quảng cáo
+  localStorage.setItem("ads_done", "1");
+
+  // Chuyển sang trang quảng cáo
+  window.location.href = "https://zalo.me/g/kwosrp269";
+}
+
+// Khi quay lại web
+window.addEventListener("load", () => {
+  const storyId = localStorage.getItem("pending_story");
+
+  if (storyId && localStorage.getItem("ads_done") === "1") {
+    localStorage.removeItem("pending_story");
+    openStoryPage(storyId);
+  }
+});
+</script>
+
+<script>
+function adsDone(){
+  localStorage.setItem("ads_done","1");
+  document.getElementById("adsOverlay").style.display = "none";
+
+  // quay lại truyện sau khi xem quảng cáo
+  const story = localStorage.getItem("pending_story");
+  if(story){
+    localStorage.removeItem("pending_story");
+    openStoryPage(story);
+  }
+}
+
+function openAdsNewTab(){
+  localStorage.setItem("ads_done","1");
+  window.open("https://zalo.me/g/kwosrp269","_blank");
+  adsDone();
+}
+</script>
+
+
 
 </body>
 </html>

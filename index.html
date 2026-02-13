@@ -34,7 +34,7 @@ header{
   top:0;
   z-index:99;
   background:#000000;
-  color:#ce280b;
+  color:#e50000;
   padding:20px;
   display:flex;
   gap:15px;
@@ -44,16 +44,35 @@ header{
 
   font-size:21px; /* 👈 tăng cỡ chữ */
 }
+#userBox{
+  font-size:16px;     /* 👈 thu nhỏ chữ */
+  color:#ddd;
+  display:flex;
+  align-items:center;
+  gap:20px;
+}
+
+#btnVip{
+  color: gold;           /* 👈 MÀU CHỮ */
+  background: #000000;   /* nền (tuỳ chọn) */
+  border: 1px solid rgb(246, 6, 6);
+  font-weight: bold;
+}
+
+#btnVip:hover{
+  color: white;
+  background: red;
+}
 
 /* đổi màu nút */
 button{
   padding:8px 12px;
-  border:1px solid #cd2c2c;
+  border:1px solid #ff0000;
   border-radius:6px;
-  background:#100f0f;
-  color:#a87777;
+  background:#ff0000;
+  color:#ffffff;
   cursor:pointer;
-  font-weight:500;
+  font-weight:700;
 }
 
 button:hover{
@@ -940,7 +959,7 @@ async function logout(){
     </h2>
 
     <p style="font-size:18px;margin:20px 0">
-      👉 Click để nhận ưu đãi đặc biệt
+      👉 Click để vào nhóm cộng đồng nhé anh em
     </p>
 
 <a href="https://www.google.com"
@@ -971,7 +990,7 @@ async function logout(){
 function handleStoryClick(id) {
 
   // Nếu đã xem quảng cáo rồi → vào truyện luôn
-  if (sessionStorage.getItem("ads_done") === "1") {
+  if (sessionStorage.getItem("ads_done") === "0") {
     openStoryPage(id);
     return;
   }
@@ -1023,7 +1042,6 @@ function openAdsNewTab(){
   adsDone();
 }
 </script>
-
 
 
 </body>

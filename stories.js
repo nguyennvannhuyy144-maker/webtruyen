@@ -1,116 +1,24 @@
 const storiesData=[
   {
   id:1,
- title:"abc",
-cover:"https://img.youtube.com/vi/i5RfNgYNjQM/maxresdefault.jpg",
- desc:"abc",
- chapters:[
-  {name:"Chương 1",vip:false,type:"mp4",video:"https://www.w3schools.com/html/mov_bbb.mp4"},
-  {name:"Chương 2",vip:true,type:"youtube",video:"https://www.youtube.com/embed/iFb-AkgI-Ts"},
-  {name:"Chương 3",vip:true,type:"youtube",video:"https://www.youtube.com/embed/_DSiCsOK0PI"},
+title:"<b>CHẲNG CÓ LINH CĂN, PHẾ VẬT ĐƯỢC HỆ THỐNG CHỌN, DIỆT SẠCH CƯƠNG THI!</b><br>    <b></b>",   
+cover:"https://img.youtube.com/vi/sPlcXEEvDuw/maxresdefault.jpg",
+desc:"14 Chương ",
+chapters:[
+  {name:"Chương 1",vip:false,type:"youtube",video:"https://www.youtube.com/embed/sPlcXEEvDuw"},
+  {name:"Chương 2",vip:true,type:"youtube",video:"https://www.youtube.com/embed/mBF8AFToESM"},
+  {name:"Chương 3",vip:true,type:"youtube",video:"https://www.youtube.com/embed/G_E9e3ZT9r8"},
+ ]},
+   {
+  id:2,
+title:"<b>CHẲNG CÓ LINH CĂN, PHẾ VẬT ĐƯỢC HỆ THỐNG CHỌN, DIỆT SẠCH CƯƠNG THI!</b><br>    <b></b>",   
+cover:"https://img.youtube.com/vi/sPlcXEEvDuw/maxresdefault.jpg",
+desc:"14 Chương ",
+chapters:[
+  {name:"Chương 1",vip:false,type:"youtube",video:"https://www.youtube.com/embed/sPlcXEEvDuw"},
+  {name:"Chương 2",vip:true,type:"youtube",video:"https://www.youtube.com/embed/mBF8AFToESM"},
+  {name:"Chương 3",vip:true,type:"youtube",video:"https://www.youtube.com/embed/G_E9e3ZT9r8"},
+ ]},
 
- ]},
-   {
-  id:1,
- title:"Tu Đại Đế",
- cover:"https://picsum.photos/300/400?1",
- desc:"Tu tiên nghịch thiên",
- chapters:[
-  {name:"Chương 1",vip:false,type:"mp4",video:"https://www.w3schools.com/html/mov_bbb.mp4"},
-  {name:"Chương 2",vip:true,type:"youtube",video:"https://www.youtube.com/embed/iFb-AkgI-Ts"},
-  {name:"Chương 3",vip:true,type:"youtube",video:"https://www.youtube.com/embed/_DSiCsOK0PI"}
- ]},
-   {
-  id:1,
- title:"Tu Đại Đế",
- cover:"https://picsum.photos/300/400?1",
- desc:"Tu tiên nghịch thiên",
- chapters:[
-  {name:"Chương 1",vip:false,type:"mp4",video:"https://www.w3schools.com/html/mov_bbb.mp4"},
-  {name:"Chương 2",vip:true,type:"youtube",video:"https://www.youtube.com/embed/iFb-AkgI-Ts"},
-  {name:"Chương 3",vip:true,type:"youtube",video:"https://www.youtube.com/embed/_DSiCsOK0PI"}
- ]},
-   {
-  id:1,
- title:"Tu Đại Đế",
- cover:"https://picsum.photos/300/400?1",
- desc:"Tu tiên nghịch thiên",
- chapters:[
-  {name:"Chương 1",vip:false,type:"mp4",video:"https://www.w3schools.com/html/mov_bbb.mp4"},
-  {name:"Chương 2",vip:true,type:"youtube",video:"https://www.youtube.com/embed/iFb-AkgI-Ts"},
-  {name:"Chương 3",vip:true,type:"youtube",video:"https://www.youtube.com/embed/_DSiCsOK0PI"}
- ]},
-   {
-  id:1,
- title:"Tu Đại Đế",
- cover:"https://picsum.photos/300/400?1",
- desc:"Tu tiên nghịch thiên",
- chapters:[
-  {name:"Chương 1",vip:false,type:"mp4",video:"https://www.w3schools.com/html/mov_bbb.mp4"},
-  {name:"Chương 2",vip:true,type:"youtube",video:"https://www.youtube.com/embed/iFb-AkgI-Ts"},
-  {name:"Chương 3",vip:true,type:"youtube",video:"https://www.youtube.com/embed/_DSiCsOK0PI"}
- ]},
-   {
-  id:1,
- title:"Tu Đại Đế",
- cover:"https://picsum.photos/300/400?1",
- desc:"Tu tiên nghịch thiên",
- chapters:[
-  {name:"Chương 1",vip:false,type:"mp4",video:"https://www.w3schools.com/html/mov_bbb.mp4"},
-  {name:"Chương 2",vip:true,type:"youtube",video:"https://www.youtube.com/embed/iFb-AkgI-Ts"},
-  {name:"Chương 3",vip:true,type:"youtube",video:"https://www.youtube.com/embed/_DSiCsOK0PI"}
- ]},
-   {
-  id:1,
- title:"Tu Đại Đế",
- cover:"https://picsum.photos/300/400?1",
- desc:"Tu tiên nghịch thiên",
- chapters:[
-  {name:"Chương 1",vip:false,type:"mp4",video:"https://www.w3schools.com/html/mov_bbb.mp4"},
-  {name:"Chương 2",vip:true,type:"youtube",video:"https://www.youtube.com/embed/iFb-AkgI-Ts"},
-  {name:"Chương 3",vip:true,type:"youtube",video:"https://www.youtube.com/embed/_DSiCsOK0PI"}
- ]},
-   {
-  id:1,
- title:"Tu Đại Đế",
- cover:"https://picsum.photos/300/400?1",
- desc:"Tu tiên nghịch thiên",
- chapters:[
-  {name:"Chương 1",vip:false,type:"mp4",video:"https://www.w3schools.com/html/mov_bbb.mp4"},
-  {name:"Chương 2",vip:true,type:"youtube",video:"https://www.youtube.com/embed/iFb-AkgI-Ts"},
-  {name:"Chương 3",vip:true,type:"youtube",video:"https://www.youtube.com/embed/_DSiCsOK0PI"}
- ]},
-   {
-  id:1,
- title:"Tu Đại Đế",
- cover:"https://picsum.photos/300/400?1",
- desc:"Tu tiên nghịch thiên",
- chapters:[
-  {name:"Chương 1",vip:false,type:"mp4",video:"https://www.w3schools.com/html/mov_bbb.mp4"},
-  {name:"Chương 2",vip:true,type:"youtube",video:"https://www.youtube.com/embed/iFb-AkgI-Ts"},
-  {name:"Chương 3",vip:true,type:"youtube",video:"https://www.youtube.com/embed/_DSiCsOK0PI"}
- ]},
-   {
-  id:1,
- title:"Tu Đại Đế",
- cover:"https://picsum.photos/300/400?1",
- desc:"Tu tiên nghịch thiên",
- chapters:[
-  {name:"Chương 1",vip:false,type:"mp4",video:"https://www.w3schools.com/html/mov_bbb.mp4"},
-  {name:"Chương 2",vip:true,type:"youtube",video:"https://www.youtube.com/embed/iFb-AkgI-Ts"},
-  {name:"Chương 3",vip:true,type:"youtube",video:"https://www.youtube.com/embed/_DSiCsOK0PI"}
- ]},
-   {
-  id:1,
- title:"Tu Đại Đế",
- cover:"https://picsum.photos/300/400?1",
- desc:"Tu tiên nghịch thiên",
- chapters:[
-  {name:"Chương 1",vip:false,type:"mp4",video:"https://www.w3schools.com/html/mov_bbb.mp4"},
-  {name:"Chương 2",vip:true,type:"youtube",video:"https://www.youtube.com/embed/iFb-AkgI-Ts"},
-  {name:"Chương 3",vip:true,type:"youtube",video:"https://www.youtube.com/embed/_DSiCsOK0PI"}
- ]},
  
- 
-
 ]
